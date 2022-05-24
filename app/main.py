@@ -28,10 +28,15 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/distriute", methods=["GET", "POST"])
+def texts():
+    return render_template("texts.html")
+
+
 @app.route("/stream", methods=["GET", "POST"])
 def stream():
 
-    data = stream_to_dataframe()
+    data = pd.read_csv("./participants.csv", sep="\t")
 
     return render_template("stream.html", data=data.to_html())
 
