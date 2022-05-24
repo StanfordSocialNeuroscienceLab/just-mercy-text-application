@@ -3,6 +3,13 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+
+/* INDEX */
+.index_image {
+    width: 50%;
+    margin: 5%;
+}
+
 /* DEV */
 .dev_table {
     margin-left: auto;
