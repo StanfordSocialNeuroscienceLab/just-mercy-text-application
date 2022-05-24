@@ -1,0 +1,17 @@
+<html>
+    {% extends "base.html" %}
+
+    <body>
+        {% block content %}
+
+        <h1>
+            Is this thing on?
+        </h1>
+
+        <a href="{{ url_for('stream') }}">
+            Development
+        </a>
+
+        {% endblock %}
+    </body>
+</html>
