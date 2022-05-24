@@ -6,12 +6,14 @@ body {
 
 /* INDEX */
 .index_image {
-    width: 50%;
+    width: 40%;
     margin: 5%;
 }
 
 /* DEV */
-.dev_table {
+.dev_table table {
+    padding: 50px 0px;
     margin-left: auto;
     margin-right: auto;
+    width: 85%;
 }
