@@ -5,7 +5,13 @@
 
         {% block content %}
 
-        Let's get this bread
+        <a href="{{ url_for('index') }}">
+            <img src="static/THE_OG.jpg" class="index_image">
+        </a>
+
+        <form action="{{ url_for('texts') }}" method="POST">
+            <input type="submit" value="Send Texts" class="text_button">
+        </form>
 
         {% endblock %}
     </body>
