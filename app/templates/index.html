@@ -6,21 +6,35 @@
 
         <img src="static/THE_OG.jpg" class="index_image">
 
-        <h1>
-            <b>Just Mercy Text Application</b>
-        </h1>
+        <div class="index_container">
+            <h1>
+                <b>Just Mercy Text Application</b>
+            </h1>
+    
+            <a href="{{ url_for('texts') }}">
+                <h2>
+                    Send Texts
+                </h2>
+            </a>
+    
+            <a href="{{ url_for('stream') }}">
+                <h2>
+                    Participant Log
+                </h2>
+            </a>
 
-        <a href="{{ url_for('texts') }}">
-            <h2>
-                Send Texts
-            </h2>
-        </a>
+            <a href="{{ url_for('update') }}">
+                <h2>
+                    Ignore Participants
+                </h2>
+            </a>
 
-        <a href="{{ url_for('stream') }}">
-            <h2>
-                Participant Log
-            </h2>
-        </a>
+            <a href="{{ url_for('add_to_db') }}">
+                <h2>
+                    Add to Database
+                </h2>
+            </a>
+        </div>
 
         {% endblock %}
     </body>
