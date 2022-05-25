@@ -27,27 +27,124 @@ TWIL_account, TWIL_auth, TWIL_number = twilio_init()
 API = Client(TWIL_account, TWIL_auth)
 
 
-def stream_to_dataframe():
+def send_texts(dataframe):
 
-    output = pd.DataFrame()
+    today = datetime.today().strftime("%m/%d/%Y")
 
-    for text in API.messages.stream():
+    for ix, name in enumerate(dataframe['name']):
 
-        if text.from_ != "+18043732715":
+        contact_number = dataframe['phone_number'][ix]
+        study_date = dataframe['date_of_study'][ix]
 
-            try:
-                temp = pd.DataFrame({
-                    "created": text.date_sent,
-                    "from": text.from_,
-                    "text_body": text.body
-                }, index=[0])
-            
-            except:
-                continue
+        first_name = name.split(' ')[0].title()
 
-            output = output.append(temp, ignore_index=True)
+        if dataframe['first_contact'][ix] == "INCOMPLETE":
+            iter=1
+        elif dataframe['second_contact'][ix] == "INCOMPLETE":
+            iter=2
+        elif dataframe['third_contact'][ix] == "INCOMPLETE":
+            iter=3
 
-    return output
+
+        message = message_tree(iteration=iter, first_name=first_name, study_date=study_date)
+        API.messages.create(to=contact_number,
+                            from_=TWIL_number,
+                            body=message)
+
+        update_contact_date(iteration=iter, 
+                            full_name=name, 
+                            contact_number=contact_number,
+                            new_date=today)
+
+
+
+def message_tree(iteration, first_name, study_date):
+
+    if iteration == 1:
+        message = f"""Hi {first_name.title()}!\n
+This is Sydney from the Narratives Project. We would like to invite you to participate in the study. We emailed you more information. \n
+If you did not receive the email or you are no longer interested in participating, please give us a call at ‪(650) 223-5997‬. Thank you!
+            """
+
+    else:
+        message = f"""Hi {first_name.title()}!\n
+This is Sydney from the Narratives Project. This is a reminder that you're scheduled to participate in our study on {study_date}. \n
+If you are no longer interested in participating, please give us a call at ‪(650) 223-5997‬. Thank you!
+            """
+
+    return message
 
 
 # --- SQL Helpers
+def sql_init(destroy=False):
+
+    # -- Case: Database does not exist
+    if not os.path.exists(os.path.join(here, "jm.db")):
+        print("\n** Establishing Database **\n")
+        
+        
+        with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
+            with open(os.path.join(here, "schema.sql")) as script:
+                cursor = connection.cursor()
+
+                print("\n** Creating participants table **\n")
+                cursor.executescript(script.read())
+
+
+    # -- Case: Database exists and we want to start over
+    if destroy:
+        with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
+            with open(os.path.join(here, "schema.sql")) as script:
+                cursor = connection.cursor()
+
+                print("\n** Creating participants table **\n")
+                cursor.executescript(script.read())
+
+
+
+def add_subject_to_db(name, phone_number, study_date):
+    with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
+        cursor = connection.cursor()
+
+        cursor.execute(f"""
+        INSERT INTO participants (name,phone_number,date_of_study)
+        VALUES (?,?,?)
+        """, (name, phone_number, study_date))
+
+
+def ignore_participant():
+    pass
+
+
+def db_to_dataframe():
+    with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
+        query = "SELECT * FROM participants;"
+
+        return pd.read_sql(query, connection)
+
+
+def update_contact_date(iteration, full_name, contact_number, new_date):
+    
+    with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
+        cursor = connection.cursor()
+
+        if iteration == 1:
+            cursor.execute("""
+            UPDATE participants
+            SET first_contact = (?)
+            WHERE name = (?) AND phone_number = (?)
+            """, (new_date, full_name, contact_number))
+        
+        elif iteration == 2:
+            cursor.execute("""
+            UPDATE participants
+            SET second_contact = {}
+            WHERE name = {} AND phone_number = {}
+            """).format(new_date, full_name, contact_number)
+        
+        elif iteration == 3:
+            cursor.execute(f"""
+            UPDATE participants
+            SET third_contact = {new_date}
+            WHERE name = {full_name} AND phone_number = {contact_number}
+            """)
