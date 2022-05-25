@@ -5,7 +5,7 @@ JUST MERCY TEXT APP
 
 This application sends and receives texts
 from participants to support scheduling for the
-Just Merc project
+Just Mercy project
 
 Ian Richard Ferguson | Stanford University
 """
@@ -19,26 +19,59 @@ import os
 # --- App init + routing
 app = Flask(__name__)
 system_path = os.path.join(".")
+sql_init() 
 
 print("\n== App Running ==\n")
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html")
 
 
-@app.route("/distriute", methods=["GET", "POST"])
+@app.route("/distribute", methods=["GET", "POST"])
 def texts():
+
+    if request.method == "POST":
+
+        data = db_to_dataframe()
+
+        # SEND TEXTS HERE
+        send_texts(dataframe=data)
+
+        return redirect(url_for('index'))
+
     return render_template("texts.html")
 
 
 @app.route("/stream", methods=["GET", "POST"])
 def stream():
 
-    data = pd.read_csv("./participants.csv", sep="\t")
+    data = db_to_dataframe()
 
     return render_template("stream.html", data=data.to_html())
+
+
+@app.route("/update", methods=["GET", "POST"])
+def update():
+    return render_template("update.html")
+
+
+@app.route("/add-to-db", methods=["GET", "POST"])
+def add_to_db():
+
+    if request.method == "POST":
+        name_ = request.form["sub_name"]
+        phone = request.form["sub_number"]
+        date_ = request.form["sub_date"]
+
+        add_subject_to_db(name=name_,
+                          phone_number=phone,
+                          study_date=date_)
+
+        return redirect(url_for('index'))
+
+
+    return render_template("add_to_db.html")
 
 
 if __name__ == "__main__":
