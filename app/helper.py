@@ -199,6 +199,45 @@ def db_to_dataframe():
         return pd.read_sql("SELECT * FROM participants", connection)
 
 
+def get_texts(sent_by_me=False):
+    """
+    This function aggregates all sent or received texts, based on Boolean parameter
+    """
+
+    # -- Empty DF to append into
+    output = pd.DataFrame()
+
+
+    # -- All texts sent to subjects
+    if sent_by_me:
+
+        for text in API.messages.stream(from_=TWIL_number):
+            temp = pd.DataFrame({
+                "date": text.date_created,
+                "sent_to": text.to,
+                "body": text.body
+            }, index=[0])
+
+            output = output.append(temp, ignore_index=True)
+
+
+    # -- All texts sent to this number
+    else:
+
+        for text in API.messages.stream(to=TWIL_number):
+            temp = pd.DataFrame({
+                "date": text.date_created,
+                "sent_from": text.from_,
+                "body": text.body
+            }, index=[0])
+
+            output = output.append(temp, ignore_index=True)
+
+    if len(output) == 0:
+        return pd.DataFrame(columns=['date', 'sent_from', 'body'])
+
+    return output.reset_index(drop=True)
+
 
 def update_contact_date(iteration, full_name, contact_number, new_date):
     """
