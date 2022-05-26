@@ -16,13 +16,18 @@ from helper import *
 import os
 
 
-# --- App init + routing
+# --- Initialize application
 app = Flask(__name__)
 system_path = os.path.join(".")
+
+# Build database if it doesn't exist
 sql_init() 
 
 print("\n== App Running ==\n")
 
+
+
+# --- Routing
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html")
@@ -34,8 +39,6 @@ def texts():
     if request.method == "POST":
 
         data = db_to_dataframe()
-
-        # SEND TEXTS HERE
         send_texts(dataframe=data)
 
         return redirect(url_for('index'))
@@ -45,7 +48,6 @@ def texts():
 
 @app.route("/stream", methods=["GET", "POST"])
 def stream():
-
     data = db_to_dataframe()
 
     return render_template("stream.html", data=data.to_html())
@@ -69,7 +71,6 @@ def add_to_db():
                           study_date=date_)
 
         return redirect(url_for('index'))
-
 
     return render_template("add_to_db.html")
 
