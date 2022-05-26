@@ -1,4 +1,4 @@
-
+auth/*
 .DS_Store
 app/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 app/__pycache__/helper.cpython-39.pyc
