@@ -12,28 +12,50 @@
             </h1>
     
             <a href="{{ url_for('texts') }}">
-                <h2>
+                <h3>
                     Send Texts
-                </h2>
+                </h3>
             </a>
     
-            <a href="{{ url_for('stream') }}">
-                <h2>
-                    Participant Log
-                </h2>
-            </a>
+            <div class="index_box">
+                
+                <h2>Logs</h2>
 
-            <a href="{{ url_for('update') }}">
-                <h2>
-                    Ignore Participants
-                </h2>
-            </a>
+                <a href="{{ url_for('participant_log') }}">
+                    <h3>
+                        Participant Log
+                    </h3>
+                </a>
 
-            <a href="{{ url_for('add_to_db') }}">
-                <h2>
-                    Add to Database
-                </h2>
-            </a>
+                <a href="{{ url_for('outgoing_texts') }}">
+                    <h3>
+                        Outgoing Texts
+                    </h3>
+                </a>
+
+                <a href="{{ url_for('incoming_texts') }}">
+                    <h3>
+                        Incoming Texts
+                    </h3>
+                </a>
+            </div>
+
+            <div class="index_box">
+                
+                <h2>Utilities</h2>
+
+                <a href="{{ url_for('update') }}">
+                    <h3>
+                        Ignore Participants
+                    </h3>
+                </a>
+    
+                <a href="{{ url_for('add_to_db') }}">
+                    <h3>
+                        Add to Database
+                    </h3>
+                </a>
+            </div>
         </div>
 
         {% endblock %}
