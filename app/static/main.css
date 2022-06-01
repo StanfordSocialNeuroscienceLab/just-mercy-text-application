@@ -4,6 +4,17 @@ body {
 }
 
 
+/* LOGIN */
+.login_box {
+    margin: 10%;
+    padding: 10px;
+}
+
+.login_box h1, h2 {
+    margin: 2%;
+}
+
+
 /* INDEX */
 .index_image {
     width: 40%;
