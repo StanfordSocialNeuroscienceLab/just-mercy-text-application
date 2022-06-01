@@ -1,0 +1,30 @@
+<html>
+      {% extends "base.html" %}
+
+      <body>
+            {% block content %}
+
+            <div class="login_box">
+                  <h1>
+                        <b>
+                              Just Mercy Text Application
+                        </b>
+                  </h1>
+                  <h2>
+                        Login Here
+                  </h2>
+                  <form action="" method="POST">
+                        <input type="password" placeholder="Password" name="password" value="{{request.form.password}}">
+                        <br> <br>
+                        <input type="submit" value="Login">
+                  </form>
+                  {% if error %}
+                        <p class="error">
+                              <strong>Error: </strong> {{ error }}
+                        </p>
+                  {% endif %}
+            </div>
+
+            {% endblock %}
+      </body>
+</html>
