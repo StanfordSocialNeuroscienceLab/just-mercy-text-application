@@ -28,6 +28,20 @@ print("\n== App Running ==\n")
 
 
 # ==== Routing ====
+# --- Login
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+
+    if request.method == "POST":
+        if request.form['password'] != "justmercy":
+            error = "INVALID PASSWORD"
+        else:
+            return redirect(url_for("index"))
+
+    return render_template("login.html", error=error)
+
+
 # --- Index
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -64,7 +78,6 @@ def outgoing_texts():
 def incoming_texts():
     data = get_texts(sent_by_me=False)
     return render_template("incoming_texts.html", data=data.to_html())
-
 
 
 # --- Utilities
