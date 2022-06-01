@@ -20,7 +20,7 @@ def twilio_init():
     login credentials to instantiate API connection
     """
 
-    with open(os.path.join(here, "twilio.json")) as incoming:
+    with open(os.path.join(here, "packets/twilio.json")) as incoming:
         creds = json.load(incoming)
 
     return creds["sid"], creds["auth"], creds["my_number"]
@@ -57,39 +57,30 @@ def send_texts(dataframe):
         # E.g., Ian Ferguson => Ian
         first_name = name.split(' ')[0].title()
 
-        # Determine contact iteration for the given subject
-        if dataframe['first_contact'][ix] == "INCOMPLETE":
-            iter=1
-        elif dataframe['second_contact'][ix] == "INCOMPLETE":
-            iter=2
-        elif dataframe['third_contact'][ix] == "INCOMPLETE":
-            iter=3
-
         # Text message body derived from helper function
-        message = message_tree(iteration=iter, 
-                               first_name=first_name, 
-                               study_date=study_date)
+        variable, message = message_tree(study_date=study_date, 
+                                         first_name=first_name)
 
-        # Send text message
-        API.messages.create(to=contact_number,
-                            from_=TWIL_number,
-                            body=message)
+        if message is not None:
+            # Send text message
+            API.messages.create(to=contact_number,
+                                from_=TWIL_number,
+                                body=message)
 
-        # Update subject's information on database
-        update_contact_date(iteration=iter, 
-                            full_name=name, 
-                            contact_number=contact_number,
-                            new_date=today)
+            # Update subject's information on database
+            update_contact_date(variable_name=variable,
+                                full_name=name, 
+                                contact_number=contact_number,
+                                new_date=today)
 
 
 
-def message_tree(iteration, first_name, study_date):
+def message_tree(study_date, first_name):
     """
     This function determines what message a subject will receive
     based on how many times they've been contacted previously
 
     Parameters
-        iteration:  int or str | Current iteration of SMS contact with subject
         first_name: str | Subject's first name (e.g., "Ian")
         study_date: str | Date that subject will engage with our research
 
@@ -97,21 +88,133 @@ def message_tree(iteration, first_name, study_date):
         Long-form string to use as body of SMS text message
     """
 
-    # -- Initial message
-    if iteration == 1:
-        message = f"""Hi {first_name.title()}!\n
-This is Sydney from the Narratives Project. We would like to invite you to participate in the study. We emailed you more information. \n
-If you did not receive the email or you are no longer interested in participating, please give us a call at ‪(650) 223-5997‬. Thank you!
-            """
+    today = datetime.today().strftime("%m/%d/%Y")
+    time_delta = get_time_delta(study_date=study_date, check_date=today, method="days")
 
-    # -- Subsequent messages
+    # -- Intro text
+    if time_delta == -3:
+        var = "intro_text"
+
+        message = f"""Hi {first_name}!\n
+You have been selected to participate in the Narratives Project! If you are still interested in participating, please read the email we sent you. It might be in your spam folder.\n 
+If you have any questions, call or text us at (650)-223-5997 and we will get back to you as soon as possible.
+        """
+    
+    # -- Reminder Day 1
+    elif time_delta == 0:
+        var = "rem1"
+
+        message = f"""Hello!\n
+This is your reminder that if you would like to participate in the Narratives Project, please click the link we sent to your email and begin the study. Please complete Visits 1 and 2 by Day 4 at 11:59 PM. If you have any questions, call or text us at (650)-223-5997 and we will get back to you as soon as possible.    
+        """
+
+    # -- Reminder Day 2
+    elif time_delta == 3:
+        var = "rem2"
+
+        message = """Hello!\n
+This is your reminder that today is the last day to complete Visits 1 and 2 of the Narratives Project. Please click the link we sent to your email and begin, or log back in to finish.        
+        """
+
+    # -- Reminder Day 3
+    elif time_delta == 6:
+        var = "rem3"
+
+        message = """Hello!\n
+This is your reminder to log back into the website and complete Visit 3 of the Narratives Project. We emailed you the link to log back into the website. Please complete Visit 3 on the day that is 1 week after you completed Visit 2. If you forgot when you completed Visit 2, you can log in to the website and it tells you what day to log back in for Visit 3. \n
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!        
+        """
+
+    # -- Reminder Day 4
+    elif time_delta == 9:
+        var = "rem4"
+
+        message = """Hello!\n 
+This is your reminder to log back into the website and complete Visit 3 of the Narratives Project if you have not already done so. We emailed you the link to log back into the website.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!
+        """
+
+    # -- Payment Day 1
+    elif time_delta == 11:
+        var = "pay1"
+
+        message = """Hello and thank you for participating in part or all of Visits 1-3.\n 
+We emailed you your giftcard. Visit 4 will happen in a few weeks - we will email and text you to remind you to complete it.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard! Thanks again!        
+        """
+
+    # -- Reminder Day 5
+    elif time_delta == 29:
+        var = "rem5"
+
+        message = """Hello!\n
+This is your reminder to complete Visit 4 of the Narratives Project. Please complete it on the day that is 1 month after you completed Visit 2. If you forgot when you completed Visit 2, you can log in to the website and it tells you what day to log back in for Visit 4.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!
+        """
+
+    # -- Reminder Day 6
+    elif time_delta == 32:
+        var = "rem6"
+
+        message = """Hello!\n 
+This is your reminder to log back into the website and complete Visit 4 of the Narratives Project if you have not already done so. We emailed you the link to log back into the website.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!
+        """
+
+    # -- Payment Day 2
+    elif time_delta == 34:
+        var = "pay2"
+
+        message = """Hello and thank you for participating in part or all of Visit 4.\n
+We emailed you your giftcard. Visit 5 will happen in a few months - we will email and text you to remind you to complete it.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!
+        """
+
+    # -- Reminder Day 7
+    elif time_delta == 89:
+        var = "rem7"
+
+        message = """Hello!\n 
+This is your reminder to complete Visit 5 of the Narratives Project.  Please complete it on the day that is 3 months after you completed Visit 2. If you forgot when you completed Visit 2, you can log in to the website and it tells you what day to log back in for Visit 5.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!
+        """
+
+    # -- Reminder Day 8
+    elif time_delta == 92:
+        var = "rem8"
+
+        message = """Hello!\n 
+This is your reminder to log back into the website and complete Visit 5 of the Narratives Project if you have not already done so. We emailed you the link to log back into the website.\n 
+And remember: if you complete all 5 visits you will be entered into a raffle to receive an extra $250 giftcard!        
+        """
+
+    # -- Payment Day 3
+    elif time_delta == 94:
+        var = "pay3"
+
+        message = """
+Hello and thank you for participating in part or all of Visit 5. We emailed you your giftcard. Thanks again for participating in the Narratives Project!
+        """
+
+    # -- No need to text!
     else:
-        message = f"""Hi {first_name.title()}!\n
-This is Sydney from the Narratives Project. This is a reminder that you're scheduled to participate in our study on {study_date}. \n
-If you are no longer interested in participating, please give us a call at ‪(650) 223-5997‬. Thank you!
-            """
+        return None, None
 
-    return message
+    return var, message
+
+
+
+def get_time_delta(study_date, check_date, method="days"):
+    """
+    Easy function to calculate distance between check_date (today) and the
+    date that the subject engages in our research
+    """
+
+    study = datetime.strptime(study_date, "%m/%d/%Y")
+    check = datetime.strptime(check_date, "%m/%d/%Y")
+
+    if method == "days":
+        return (check - study).days
 
 
 
@@ -183,9 +286,9 @@ def ignore_participant(full_name, contact_number):
 
         cursor.execute("""
         UPDATE participants
-        SET ignore = True
+        SET ignore = (?)
         WHERE name = (?) AND phone_number = (?)
-        """, (full_name, contact_number))
+        """, (True, full_name, contact_number))
 
 
 
@@ -197,6 +300,7 @@ def db_to_dataframe():
     
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         return pd.read_sql("SELECT * FROM participants", connection)
+
 
 
 def get_texts(sent_by_me=False):
@@ -239,13 +343,14 @@ def get_texts(sent_by_me=False):
     return output.reset_index(drop=True)
 
 
-def update_contact_date(iteration, full_name, contact_number, new_date):
+
+def update_contact_date(variable_name, full_name, contact_number, new_date):
     """
     This function updates the contact information in our participants table
     which informs the messaging that subjects will receive in future texts
 
     Parameters
-        iteration: str or int | Iteration of subject contact (1,2,3)
+        variable_name: str | Column name in SQL database
         full_name: str | Subject's full name
         contact_number: str | Subject's phone number
         new_date: str | Today's date, in practice
@@ -254,23 +359,86 @@ def update_contact_date(iteration, full_name, contact_number, new_date):
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         cursor = connection.cursor()
 
-        if iteration == 1:
+        if variable_name == "intro_text":
             cursor.execute("""
             UPDATE participants
-            SET first_contact = (?)
-            WHERE name = (?) AND phone_number = (?)
+            SET intro_text = (?)
+            WHERE name = (?) AND phone_number = (?);
             """, (new_date, full_name, contact_number))
-        
-        elif iteration == 2:
+
+        elif variable_name == "rem1":
             cursor.execute("""
             UPDATE participants
-            SET second_contact = (?)
-            WHERE name = (?) AND phone_number = (?)
+            SET rem1 = (?)
+            WHERE name = (?) AND phone_number = (?);
             """, (new_date, full_name, contact_number))
-        
-        elif iteration == 3:
-            cursor.execute(f"""
+
+        elif variable_name == "rem2":
+            cursor.execute("""
             UPDATE participants
-            SET third_contact = (?)
-            WHERE name = (?) AND phone_number = (?)
+            SET rem2 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem3":
+            cursor.execute("""
+            UPDATE participants
+            SET rem3 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem4":
+            cursor.execute("""
+            UPDATE participants
+            SET rem4 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "pay1":
+            cursor.execute("""
+            UPDATE participants
+            SET pay1 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem5":
+            cursor.execute("""
+            UPDATE participants
+            SET rem5 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem6":
+            cursor.execute("""
+            UPDATE participants
+            SET rem6 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "pay2":
+            cursor.execute("""
+            UPDATE participants
+            SET pay2 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem7":
+            cursor.execute("""
+            UPDATE participants
+            SET rem7 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "rem8":
+            cursor.execute("""
+            UPDATE participants
+            SET rem8 = (?)
+            WHERE name = (?) AND phone_number = (?);
+            """, (new_date, full_name, contact_number))
+
+        elif variable_name == "pay3":
+            cursor.execute("""
+            UPDATE participants
+            SET pay3 = (?)
+            WHERE name = (?) AND phone_number = (?);
             """, (new_date, full_name, contact_number))
