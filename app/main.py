@@ -11,44 +11,71 @@ Ian Richard Ferguson | Stanford University
 """
 
 # --- Imports
-from flask import Flask, render_template, request, redirect, url_for
-from helper import *
-import os
+from flask import Flask, make_response, render_template, request, redirect, url_for
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+from utils.helper import *
+from functools import wraps
 
 
 # --- Initialize application
 app = Flask(__name__)
-system_path = os.path.join(".")
+system_path = app.root_path
+
+auth = HTTPBasicAuth()
+very_secret_pw = generate_password_hash("justmercy2022!")
 
 # Build database if it doesn't exist
 sql_init() 
 
 print("\n== App Running ==\n")
 
+user_data = {
+    "Ian": "justmercy2022!",
+    "Sydney": "justmercy2022!",
+    "Sam": "justmercy2022!",
+    "Daniel": "justmercy2022!"
+}
 
+
+@auth.verify_password
+def verify(username, password):
+    if not (username and password):
+        return False
+    return user_data.get(username) == password
 
 # ==== Routing ====
 # --- Login
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def login():
+
     error = None
 
     if request.method == "POST":
-        if request.form['password'] != "justmercy":
-            error = "INVALID PASSWORD"
+        username = request.form["username"].title()
+        pw = request.form["password"]
+
+        print("\n\nUsername: {}\nPassword: {}\n\n".format(username, pw))
+
+        if verify(username=username, password=pw):
+            return render_template("index.html")
+
         else:
-            return redirect(url_for("index"))
+            error = "Invalid Username or Password"
+            return render_template("login.html", error=error)
 
     return render_template("login.html", error=error)
 
 
 # --- Index
-@app.route("/", methods=["GET", "POST"])
+@app.route("/home", methods=["GET", "POST"])
+@auth.login_required
 def index():
     return render_template("index.html")
 
 
 @app.route("/distribute", methods=["GET", "POST"])
+@auth.login_required
 def texts():
 
     if request.method == "POST":
@@ -63,18 +90,21 @@ def texts():
 
 # --- Logs
 @app.route("/participant_log", methods=["GET", "POST"])
+@auth.login_required
 def participant_log():
     data = db_to_dataframe()
     return render_template("stream.html", data=data.to_html())
 
 
 @app.route("/outgoing_texts", methods=["GET", "POST"])
+@auth.login_required
 def outgoing_texts():
     data = get_texts(sent_by_me=True)
     return render_template("outgoing_texts.html", data=data.to_html())
 
 
 @app.route("/incoming_texts", methods=["GET", "POST"])
+@auth.login_required
 def incoming_texts():
     data = get_texts(sent_by_me=False)
     return render_template("incoming_texts.html", data=data.to_html())
@@ -82,6 +112,7 @@ def incoming_texts():
 
 # --- Utilities
 @app.route("/update", methods=["GET", "POST"])
+@auth.login_required
 def update():
 
     if request.method == "POST":
@@ -97,6 +128,7 @@ def update():
 
 
 @app.route("/add-to-db", methods=["GET", "POST"])
+@auth.login_required
 def add_to_db():
 
     if request.method == "POST":
