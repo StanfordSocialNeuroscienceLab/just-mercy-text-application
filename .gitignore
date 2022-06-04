@@ -6,3 +6,5 @@ auth/*
 app/twilio.json
 easy/twilio.json
 
+app/packets/twilio.json
+app/packets/email.json
