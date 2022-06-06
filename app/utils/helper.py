@@ -5,7 +5,7 @@ Helper Functions
 """
 
 # --- Imports
-import sqlite3, json, os
+import sqlite3, json, os, pytz
 from datetime import datetime
 import pandas as pd
 from twilio.rest import Client
@@ -88,7 +88,7 @@ def message_tree(study_date, first_name):
         Long-form string to use as body of SMS text message
     """
 
-    today = datetime.today().strftime("%m/%d/%Y")
+    today = datetime.now(pytz.timezone("US/Pacific")).strftime("%m/%d/%Y")
     time_delta = get_time_delta(study_date=study_date, check_date=today, method="days")
 
     # -- Intro text
