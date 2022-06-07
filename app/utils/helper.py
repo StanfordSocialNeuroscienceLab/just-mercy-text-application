@@ -41,7 +41,7 @@ def send_texts(dataframe):
     """
 
     # Current date, e.g., 5/26/2022
-    today = datetime.today().strftime("%m/%d/%Y")
+    today = datetime.today(pytz.timezone("US/Pacific")).strftime("%m/%d/%Y")
 
     # Loop through rows in the dataframe
     for ix, name in enumerate(dataframe['name']):
