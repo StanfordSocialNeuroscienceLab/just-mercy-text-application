@@ -14,13 +14,22 @@ Ian Richard Ferguson | Stanford University
 from flask import Flask, make_response, render_template, request, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from utils.helper import *
+from utils.db import ParseSubjects
 from functools import wraps
+import pathlib
 
 
 # --- Initialize application
 app = Flask(__name__)
 system_path = app.root_path
+
+app.config["UPLOAD_FOLDER"] = "files/uploads"
+
+if not os.path.exists(os.path.join(system_path, app.config["UPLOAD_FOLDER"])):
+    pathlib.Path(os.path.join(system_path, app.config["UPLOAD_FOLDER"])).mkdir(parents=True, 
+                                                                               exist_ok=True)
 
 auth = HTTPBasicAuth()
 very_secret_pw = generate_password_hash("justmercy2022!")
@@ -132,13 +141,22 @@ def update():
 def add_to_db():
 
     if request.method == "POST":
-        name_ = request.form["sub_name"]
-        phone = request.form["sub_number"]
-        date_ = request.form["sub_date"]
+        
+        file = request.files["file"]
+        safe_name = secure_filename(file.filename)
 
-        add_subject_to_db(name=name_,
-                          phone_number=phone,
-                          study_date=date_)
+        file_path = os.path.join(system_path, app.config["UPLOAD_FOLDER"], safe_name)
+        file.save(file_path)
+
+        # -- Push subjects to database
+        # Instantiate ParseSubjects object
+        pusher = ParseSubjects(app_path=system_path, file=file_path)
+
+        # Push to database
+        pusher.run()
+
+        # Remove file
+        os.remove(file_path)
 
         return redirect(url_for('index'))
 
