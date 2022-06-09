@@ -343,6 +343,33 @@ def get_texts(sent_by_me=False):
     return output.reset_index(drop=True)
 
 
+def get_twilio_errors():
+    """
+    Creates dataframe of underlivered texts
+    """
+
+    output = {}
+    m = 0
+
+    for k in API.messages.stream():
+
+        if k.status == "undelivered":
+
+            temp = {
+                "date": k.date_sent,
+                "to": k.to,
+                "body": k.body
+            }
+
+            output[m] = temp
+            m += 1
+
+    if m == 0:
+        return pd.DataFrame(columns=["date", "to", "body"])
+
+    return pd.DataFrame(output).T
+
+
 
 def update_contact_date(variable_name, full_name, contact_number, new_date):
     """
