@@ -119,6 +119,13 @@ def incoming_texts():
     return render_template("incoming_texts.html", data=data.to_html())
 
 
+@app.route("/twilio-errors", methods=["GET", "POST"])
+@auth.login_required
+def twilio_error_log():
+    data = get_twilio_errors()
+    return render_template("twilio_errors.html", data=data.to_html())
+
+
 # --- Utilities
 @app.route("/update", methods=["GET", "POST"])
 @auth.login_required
