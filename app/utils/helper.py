@@ -10,8 +10,13 @@ from datetime import datetime
 import pandas as pd
 from twilio.rest import Client
 
-# This will change once it's on the server
-here = os.path.join(".")
+# I am tired of this breaking lol
+if "/Users/Ian" in os.getcwd():
+    here = os.path.join(".")
+else:
+    here = "/home/snlstanford/just-mercy-text-application/app"
+
+print(f"\n\n== Working dir:\t\t{here} ==\n")
 
 # --- Twilio Helpers
 def twilio_init():
@@ -41,7 +46,7 @@ def send_texts(dataframe):
     """
 
     # Current date, e.g., 5/26/2022
-    today = datetime.today(pytz.timezone("US/Pacific")).strftime("%m/%d/%Y")
+    today = datetime.now(pytz.timezone("US/Pacific")).strftime("%m/%d/%Y")
 
     # Loop through rows in the dataframe
     for ix, name in enumerate(dataframe['name']):
@@ -61,17 +66,26 @@ def send_texts(dataframe):
         variable, message = message_tree(study_date=study_date, 
                                          first_name=first_name)
 
+        # Text needs to go out
         if message is not None:
-            # Send text message
-            API.messages.create(to=contact_number,
-                                from_=TWIL_number,
-                                body=message)
 
-            # Update subject's information on database
-            update_contact_date(variable_name=variable,
-                                full_name=name, 
-                                contact_number=contact_number,
-                                new_date=today)
+            # Avoid double-texting
+            if variable != today:
+
+                try:
+                    # Send text message
+                    API.messages.create(to=contact_number,
+                                        from_=TWIL_number,
+                                        body=message)
+
+                    # Update subject's information on database
+                    update_contact_date(variable_name=variable,
+                                        full_name=name, 
+                                        contact_number=contact_number,
+                                        new_date=today)
+
+                except:
+                    print(f"\n== {first_name} was NOT contacted ==\n")
 
 
 
@@ -469,3 +483,19 @@ def update_contact_date(variable_name, full_name, contact_number, new_date):
             SET pay3 = (?)
             WHERE name = (?) AND phone_number = (?);
             """, (new_date, full_name, contact_number))
+
+
+
+def update_contact_number(name, old_number, new_number):
+    """
+    Updates contact information in SQL database
+    """
+
+    with sqlite3.connect(os.path.join(here, "jm.db")) as connect:
+        cursor = connect.cursor()
+
+        cursor.execute("""
+        UPDATE participants
+        SET phone_number = (?)
+        WHERE name = (?) AND phone_number = (?);
+        """, (new_number, name, old_number))
