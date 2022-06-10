@@ -53,6 +53,8 @@ def verify(username, password):
         return False
     return user_data.get(username) == password
 
+    
+
 # ==== Routing ====
 # --- Login
 @app.route("/", methods=["GET", "POST"])
@@ -76,11 +78,13 @@ def login():
     return render_template("login.html", error=error)
 
 
+
 # --- Index
 @app.route("/home", methods=["GET", "POST"])
 @auth.login_required
 def index():
     return render_template("index.html")
+
 
 
 @app.route("/distribute", methods=["GET", "POST"])
@@ -97,12 +101,14 @@ def texts():
     return render_template("texts.html")
 
 
+
 # --- Logs
 @app.route("/participant_log", methods=["GET", "POST"])
 @auth.login_required
 def participant_log():
     data = db_to_dataframe()
     return render_template("stream.html", data=data.to_html())
+
 
 
 @app.route("/outgoing_texts", methods=["GET", "POST"])
@@ -112,6 +118,7 @@ def outgoing_texts():
     return render_template("outgoing_texts.html", data=data.to_html())
 
 
+
 @app.route("/incoming_texts", methods=["GET", "POST"])
 @auth.login_required
 def incoming_texts():
@@ -119,11 +126,13 @@ def incoming_texts():
     return render_template("incoming_texts.html", data=data.to_html())
 
 
+
 @app.route("/twilio-errors", methods=["GET", "POST"])
 @auth.login_required
 def twilio_error_log():
     data = get_twilio_errors()
     return render_template("twilio_errors.html", data=data.to_html())
+
 
 
 # --- Utilities
@@ -141,6 +150,7 @@ def update():
         return redirect(url_for('index'))
         
     return render_template("update.html")
+
 
 
 @app.route("/add-to-db", methods=["GET", "POST"])
@@ -168,6 +178,42 @@ def add_to_db():
         return redirect(url_for('index'))
 
     return render_template("add_to_db.html")
+
+
+
+@app.route("/change_phone_number", methods=["GET", "POST"])
+@auth.login_required
+def change_phone_number():
+
+    error = None
+
+    if request.method == "POST":
+
+        name = request.form["name"]
+        old_n = request.form["old_number"]
+        new_n = request.form["new_number"]
+
+        try:
+            update_contact_number(name=name, old_number=old_n, new_number=new_n)
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            return render_template('new_number.html', error=e)
+
+    return render_template('new_number.html', error=error)
+
+
+
+@app.route("/sms", methods=["GET", "POST"])
+def sms():
+
+    from twilio.twiml.messaging_response import MessagingResponse
+
+    response = MessagingResponse()
+    response.message("Give us a call at ‪(650) 223-5997‬ if you have any questions!")
+
+    return str(response)
+
 
 
 if __name__ == "__main__":
