@@ -12,7 +12,6 @@ Ian Richard Ferguson | Stanford University
 
 from flask import (
     Flask,
-    make_response,
     render_template,
     request,
     redirect,
@@ -20,11 +19,10 @@ from flask import (
     flash,
 )
 from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from utils.helper import *
 from utils.db import ParseSubjects
-from functools import wraps
 import pathlib
 
 
@@ -115,29 +113,29 @@ def texts():
 @app.route("/participant_log", methods=["GET", "POST"])
 @auth.login_required
 def participant_log():
-    data = db_to_dataframe()
-    return render_template("stream.html", data=data.to_html())
+    df = db_to_dataframe()
+    return render_template("logs/stream.html", data=df)
 
 
 @app.route("/outgoing_texts", methods=["GET", "POST"])
 @auth.login_required
 def outgoing_texts():
     data = get_texts(sent_by_me=True)
-    return render_template("outgoing_texts.html", data=data.to_html())
+    return render_template("logs/outgoing_texts.html", data=data)
 
 
 @app.route("/incoming_texts", methods=["GET", "POST"])
 @auth.login_required
 def incoming_texts():
     data = get_texts(sent_by_me=False)
-    return render_template("incoming_texts.html", data=data.to_html())
+    return render_template("logs/incoming_texts.html", data=data)
 
 
 @app.route("/twilio-errors", methods=["GET", "POST"])
 @auth.login_required
 def twilio_error_log():
     data = get_twilio_errors()
-    return render_template("twilio_errors.html", data=data.to_html())
+    return render_template("logs/twilio_errors.html", data=data)
 
 
 ######
@@ -155,7 +153,7 @@ def update():
 
         return redirect(url_for("index"))
 
-    return render_template("update.html")
+    return render_template("utilities/update.html")
 
 
 @app.route("/add-to-db", methods=["GET", "POST"])
@@ -182,7 +180,7 @@ def add_to_db():
 
         return redirect(url_for("index"))
 
-    return render_template("add_to_db.html")
+    return render_template("utilities/add_to_db.html")
 
 
 @app.route("/change_phone_number", methods=["GET", "POST"])
@@ -202,9 +200,9 @@ def change_phone_number():
             return redirect(url_for("index"))
 
         except Exception as e:
-            return render_template("new_number.html", error=e)
+            return render_template("utilities/new_number.html", error=e)
 
-    return render_template("new_number.html", error=error)
+    return render_template("utilities/new_number.html", error=error)
 
 
 @app.route("/test_twilio", methods=["GET", "POST"])
@@ -226,7 +224,7 @@ def test_twilio():
 
         return redirect(url_for("index"))
 
-    return render_template("test_twilio.html")
+    return render_template("utilities/test_twilio.html")
 
 
 @app.route("/nuclear_option", methods=["GET", "POST"])
@@ -245,7 +243,7 @@ def nuclear_option():
             flash(f"DATABASE WAS NOT RESET! You entered {value}")
             return redirect(url_for("index"))
 
-    return render_template("nuclear_option.html")
+    return render_template("utilities/nuclear_option.html")
 
 
 ##########
@@ -260,6 +258,9 @@ def sms():
     response.message("Give us a call at ‪(650) 223-5997‬ if you have any questions!")
 
     return str(response)
+
+
+##########
 
 
 if __name__ == "__main__":
