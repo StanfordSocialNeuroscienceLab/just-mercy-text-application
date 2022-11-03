@@ -1,24 +1,22 @@
 #!/bin/python3
-
 """
 Helper Functions
 """
-
-# --- Imports
 import sqlite3, json, os, pytz
 from datetime import datetime
 import pandas as pd
 from twilio.rest import Client
 
-# I am tired of this breaking lol
+
+##########
+
+
 if "/Users/Ian" in os.getcwd():
     here = os.path.join(".")
 else:
-    here = "/home/snlstanford/just-mercy-text-application/app"
+    here = "/home/snlstanford/just-mercy-text-application/"
 
-print(f"\n\n== Working dir:\t\t{here} ==\n")
 
-# --- Twilio Helpers
 def twilio_init():
     """
     This function reads in stored Twilio information and returns
@@ -31,9 +29,14 @@ def twilio_init():
     return creds["sid"], creds["auth"], creds["my_number"]
 
 
-# -- Twilio information + API connection
+#####
+
+
 TWIL_account, TWIL_auth, TWIL_number = twilio_init()
 API = Client(TWIL_account, TWIL_auth)
+
+
+#####
 
 
 def send_texts(dataframe):
@@ -49,22 +52,21 @@ def send_texts(dataframe):
     today = datetime.now(pytz.timezone("US/Pacific")).strftime("%m/%d/%Y")
 
     # Loop through rows in the dataframe
-    for ix, name in enumerate(dataframe['name']):
+    for ix, name in enumerate(dataframe["name"]):
 
         # Skip over subjects marked ignore
-        if dataframe['ignore'][ix] != "False":
+        if dataframe["ignore"][ix] != "False":
             continue
 
         # Participant contact number and study date
-        contact_number = dataframe['phone_number'][ix]
-        study_date = dataframe['date_of_study'][ix]
+        contact_number = dataframe["phone_number"][ix]
+        study_date = dataframe["date_of_study"][ix]
 
         # E.g., Ian Ferguson => Ian
-        first_name = name.split(' ')[0].title()
+        first_name = name.split(" ")[0].title()
 
         # Text message body derived from helper function
-        variable, message = message_tree(study_date=study_date, 
-                                         first_name=first_name)
+        variable, message = message_tree(study_date=study_date, first_name=first_name)
 
         # Text needs to go out
         if message is not None:
@@ -74,19 +76,20 @@ def send_texts(dataframe):
 
                 try:
                     # Send text message
-                    API.messages.create(to=contact_number,
-                                        from_=TWIL_number,
-                                        body=message)
+                    API.messages.create(
+                        to=contact_number, from_=TWIL_number, body=message
+                    )
 
                     # Update subject's information on database
-                    update_contact_date(variable_name=variable,
-                                        full_name=name, 
-                                        contact_number=contact_number,
-                                        new_date=today)
+                    update_contact_date(
+                        variable_name=variable,
+                        full_name=name,
+                        contact_number=contact_number,
+                        new_date=today,
+                    )
 
                 except:
                     print(f"\n== {first_name} was NOT contacted ==\n")
-
 
 
 def message_tree(study_date, first_name):
@@ -113,7 +116,7 @@ def message_tree(study_date, first_name):
 You have been selected to participate in the Narratives Project! If you are still interested in participating, please read the email we sent you. It might be in your spam folder.\n 
 If you have any questions, call or text us at (650)-223-5997 and we will get back to you as soon as possible.
         """
-    
+
     # -- Reminder Day 1
     elif time_delta == 0:
         var = "rem1"
@@ -217,7 +220,6 @@ Hello and thank you for participating in part or all of Visit 5. We emailed you 
     return var, message
 
 
-
 def get_time_delta(study_date, check_date, method="days"):
     """
     Easy function to calculate distance between check_date (today) and the
@@ -231,8 +233,6 @@ def get_time_delta(study_date, check_date, method="days"):
         return (check - study).days
 
 
-
-# --- SQL Helpers
 def sql_init(destroy=False):
     """
     This function ensures that our local SQL database exists, and it
@@ -245,15 +245,13 @@ def sql_init(destroy=False):
     # -- Case: Database does not exist
     if not os.path.exists(os.path.join(here, "jm.db")):
         print("\n** Establishing Database **\n")
-        
-        
+
         with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
             with open(os.path.join(here, "schema.sql")) as script:
                 cursor = connection.cursor()
 
                 print("\n** Creating participants table **\n")
                 cursor.executescript(script.read())
-
 
     # -- Case: Database exists and we want to start over
     if destroy:
@@ -265,7 +263,6 @@ def sql_init(destroy=False):
                 cursor.executescript(script.read())
 
 
-
 def add_subject_to_db(name, phone_number, study_date):
     """
     This function takes HTML input and pushes information to local SQLite database
@@ -275,15 +272,17 @@ def add_subject_to_db(name, phone_number, study_date):
         phone_number: str | Subject's contact number
         study_date: str | Date that subject will engage with our research
     """
-    
+
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         cursor = connection.cursor()
 
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
         INSERT INTO participants (name,phone_number,date_of_study)
         VALUES (?,?,?)
-        """, (name, phone_number, study_date))
-
+        """,
+            (name, phone_number, study_date),
+        )
 
 
 def ignore_participant(full_name, contact_number):
@@ -298,12 +297,14 @@ def ignore_participant(full_name, contact_number):
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         cursor = connection.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
         UPDATE participants
         SET ignore = (?)
         WHERE name = (?) AND phone_number = (?)
-        """, (True, full_name, contact_number))
-
+        """,
+            (True, full_name, contact_number),
+        )
 
 
 def db_to_dataframe():
@@ -311,10 +312,9 @@ def db_to_dataframe():
     This function pulls down all information from our participants table
     and converts it to a Pandas DataFrame
     """
-    
+
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         return pd.read_sql("SELECT * FROM participants", connection)
-
 
 
 def get_texts(sent_by_me=False):
@@ -325,34 +325,30 @@ def get_texts(sent_by_me=False):
     # -- Empty DF to append into
     output = pd.DataFrame()
 
-
     # -- All texts sent to subjects
     if sent_by_me:
 
         for text in API.messages.stream(from_=TWIL_number):
-            temp = pd.DataFrame({
-                "date": text.date_created,
-                "sent_to": text.to,
-                "body": text.body
-            }, index=[0])
+            temp = pd.DataFrame(
+                {"date": text.date_created, "sent_to": text.to, "body": text.body},
+                index=[0],
+            )
 
             output = output.append(temp, ignore_index=True)
-
 
     # -- All texts sent to this number
     else:
 
         for text in API.messages.stream(to=TWIL_number):
-            temp = pd.DataFrame({
-                "date": text.date_created,
-                "sent_from": text.from_,
-                "body": text.body
-            }, index=[0])
+            temp = pd.DataFrame(
+                {"date": text.date_created, "sent_from": text.from_, "body": text.body},
+                index=[0],
+            )
 
             output = output.append(temp, ignore_index=True)
 
     if len(output) == 0:
-        return pd.DataFrame(columns=['date', 'sent_from', 'body'])
+        return pd.DataFrame(columns=["date", "sent_from", "body"])
 
     return output.reset_index(drop=True)
 
@@ -369,11 +365,7 @@ def get_twilio_errors():
 
         if k.status == "undelivered":
 
-            temp = {
-                "date": k.date_sent,
-                "to": k.to,
-                "body": k.body
-            }
+            temp = {"date": k.date_sent, "to": k.to, "body": k.body}
 
             output[m] = temp
             m += 1
@@ -382,7 +374,6 @@ def get_twilio_errors():
         return pd.DataFrame(columns=["date", "to", "body"])
 
     return pd.DataFrame(output).T
-
 
 
 def update_contact_date(variable_name, full_name, contact_number, new_date):
@@ -396,94 +387,129 @@ def update_contact_date(variable_name, full_name, contact_number, new_date):
         contact_number: str | Subject's phone number
         new_date: str | Today's date, in practice
     """
-    
+
     with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
         cursor = connection.cursor()
 
         if variable_name == "intro_text":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET intro_text = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem1":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem1 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem2":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem2 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem3":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem3 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem4":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem4 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "pay1":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET pay1 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem5":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem5 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem6":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem6 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "pay2":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET pay2 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem7":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem7 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "rem8":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET rem8 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
+            """,
+                (new_date, full_name, contact_number),
+            )
 
         elif variable_name == "pay3":
-            cursor.execute("""
+            cursor.execute(
+                """
             UPDATE participants
             SET pay3 = (?)
             WHERE name = (?) AND phone_number = (?);
-            """, (new_date, full_name, contact_number))
-
+            """,
+                (new_date, full_name, contact_number),
+            )
 
 
 def update_contact_number(name, old_number, new_number):
@@ -494,8 +520,11 @@ def update_contact_number(name, old_number, new_number):
     with sqlite3.connect(os.path.join(here, "jm.db")) as connect:
         cursor = connect.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
         UPDATE participants
         SET phone_number = (?)
         WHERE name = (?) AND phone_number = (?);
-        """, (new_number, name, old_number))
+        """,
+            (new_number, name, old_number),
+        )
