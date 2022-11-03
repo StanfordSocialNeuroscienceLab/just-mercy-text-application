@@ -207,6 +207,28 @@ def change_phone_number():
     return render_template("new_number.html", error=error)
 
 
+@app.route("/test_twilio", methods=["GET", "POST"])
+@auth.login_required
+def test_twilio():
+    """
+    Test connection to Twilio API
+    """
+
+    if request.method == "POST":
+        textee = request.form["receive"]
+
+        try:
+            test_twilio_wrapper(name=textee)
+            flash("TEST SUCCESSFUL")
+
+        except Exception as e:
+            raise e
+
+        return redirect(url_for("index"))
+
+    return render_template("test_twilio.html")
+
+
 @app.route("/nuclear_option", methods=["GET", "POST"])
 @auth.login_required
 def nuclear_option():
@@ -224,6 +246,9 @@ def nuclear_option():
             return redirect(url_for("index"))
 
     return render_template("nuclear_option.html")
+
+
+##########
 
 
 @app.route("/sms", methods=["GET", "POST"])

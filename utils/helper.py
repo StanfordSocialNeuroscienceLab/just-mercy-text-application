@@ -108,7 +108,7 @@ def message_tree(study_date, first_name):
     time_delta = get_time_delta(study_date=study_date, check_date=today, method="days")
 
     # -- Intro text
-    if time_delta == -3:
+    if time_delta == -1:
         var = "intro_text"
 
         message = f"""Hi {first_name}!\n
@@ -531,3 +531,19 @@ def update_contact_number(name, old_number, new_number):
         """,
             (new_number, name, old_number),
         )
+
+
+def test_twilio_wrapper(name: str = "Ian"):
+    """
+    Used to confirm API connection is solid before deployment
+    """
+
+    if name.upper() == "IAN":
+        number = "+17038190646"
+
+    elif name.upper() == "SYDNEY":
+        number = "+15597569356"
+
+    message = "Sup big dog, this is a test of the automated Just Mercy text system"
+
+    API.messages.create(to=number, from_=TWIL_number, body=message)
