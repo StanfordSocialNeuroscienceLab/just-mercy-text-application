@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 from twilio.rest import Client
 from time import sleep
+from flask import flash
 
 
 ##########
@@ -86,8 +87,8 @@ def send_texts(dataframe):
                         new_date=today,
                     )
 
-                except:
-                    print(f"\n== {first_name} was NOT contacted ==\n")
+                except Exception as e:
+                    flash(f"{first_name} was NOT contacted ... {e}")
 
 
 def message_tree(study_date, first_name):
@@ -280,9 +281,9 @@ def add_subject_to_db(name, phone_number, study_date):
 
         cursor.execute(
             f"""
-        INSERT INTO participants (name,phone_number,date_of_study)
-        VALUES (?,?,?)
-        """,
+            INSERT INTO participants (name,phone_number,date_of_study)
+            VALUES (?,?,?)
+            """,
             (name, phone_number, study_date),
         )
 
