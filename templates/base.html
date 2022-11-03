@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>
-            Just Mercy Text Application
-        </title>
-        <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
-        <link rel="stylesheet" href="static/main.css">
-    </head>
-    <body>
-        {% block content %}
 
-        {% endblock %}
-    </body>
+<head>
+    <title>
+        Just Mercy Text Application
+    </title>
+    <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="static/main.css">
+</head>
+
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-warning alert-dismissible" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+    {% block content %}
+    {% endblock %}
+</body>
+
 </html>
