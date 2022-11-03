@@ -10,7 +10,15 @@ Just Mercy project
 Ian Richard Ferguson | Stanford University
 """
 
-from flask import Flask, make_response, render_template, request, redirect, url_for
+from flask import (
+    Flask,
+    make_response,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+)
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -27,6 +35,7 @@ app = Flask(__name__)
 system_path = app.root_path
 
 app.config["UPLOAD_FOLDER"] = "files/uploads"
+app.config["SECRET_KEY"] = "jamil4ever"
 
 if not os.path.exists(os.path.join(system_path, app.config["UPLOAD_FOLDER"])):
     pathlib.Path(os.path.join(system_path, app.config["UPLOAD_FOLDER"])).mkdir(
@@ -196,6 +205,25 @@ def change_phone_number():
             return render_template("new_number.html", error=e)
 
     return render_template("new_number.html", error=error)
+
+
+@app.route("/nuclear_option", methods=["GET", "POST"])
+@auth.login_required
+def nuclear_option():
+
+    if request.method == "POST":
+        value = request.form["confirm"].strip().upper()
+
+        if value == "YES":
+            sql_init(destroy=True)
+            flash("DATABASE RESET SUCCESSFULLY")
+            return redirect(url_for("index"))
+
+        else:
+            flash(f"DATABASE WAS NOT RESET! You entered {value}")
+            return redirect(url_for("index"))
+
+    return render_template("nuclear_option.html")
 
 
 @app.route("/sms", methods=["GET", "POST"])
