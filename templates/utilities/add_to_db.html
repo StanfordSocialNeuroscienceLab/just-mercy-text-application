@@ -1,0 +1,16 @@
+<html>
+{% extends "base.html" %}
+
+<body>
+    {% block content %}
+
+    <form action="{{ url_for('add_to_db') }}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" accept=".csv, .xlsx">
+        <br> <br>
+        <input type="submit" value="Add to Database">
+    </form>
+
+    {% endblock %}
+</body>
+
+</html>

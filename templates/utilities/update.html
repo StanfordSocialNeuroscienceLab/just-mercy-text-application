@@ -1,0 +1,21 @@
+<html>
+{% extends "base.html" %}
+
+<body>
+    {% block content %}
+
+    <form action="{{ url_for('update') }}" method="POST">
+        <h2>Participant to Ignore</h2>
+        <label for="ignore_name">Name</label> <br>
+        <input type="text" id="ignore_name" name="ignore_name">
+        <br><br><br><br>
+        <label for="ignore_number">Phone Number</label> <br>
+        <input type="text" id="ignore_number" name="ignore_number">
+        <br><br><br><br>
+        <input type="submit" value="Ignore This Person">
+    </form>
+
+    {% endblock %}
+</body>
+
+</html>

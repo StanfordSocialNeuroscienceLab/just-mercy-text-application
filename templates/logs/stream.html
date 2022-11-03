@@ -1,0 +1,18 @@
+<html>
+{% extends "base.html" %}
+
+<body>
+    {% block content %}
+
+    <h2>
+        Participant Log
+    </h2>
+
+    <div class="dev_table">
+        {{ data | safe }}
+    </div>
+
+    {% endblock %}
+</body>
+
+</html>
