@@ -3,6 +3,10 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+.nav-button-ian {
+    padding: 5px;
+}
+
 
 /* LOGIN */
 .login_box {

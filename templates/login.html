@@ -1,32 +1,46 @@
 <html>
-      {% extends "base.html" %}
 
-      <body>
-            {% block content %}
+<head>
+      <title>
+            Just Mercy Text Application
+      </title>
 
-            <div class="login_box">
-                  <h1>
-                        <b>
-                              Just Mercy Text Application
-                        </b>
-                  </h1>
-                  <h2>
-                        Login Here
-                  </h2>
+      <!-- Bootstrap CSS -->
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
 
-                  <form action="" method="POST">
-                        <input type="text" placeholder="Username" name="username" id="username"> <br>
-                        <input type="password" placeholder="Password" name="password" value="{{request.form.password}}">
-                        <br> <br>
-                        <input type="submit" value="Login">
-                  </form>
-                  {% if error %}
-                        <p class="error">
-                              <strong>Error: </strong> {{ error }}
-                        </p>
-                  {% endif %}
-            </div>
+      <!-- Custom CSS -->
+      <link rel="stylesheet" href="static/main.css">
+</head>
 
-            {% endblock %}
-      </body>
+<body>
+      {% block content %}
+
+      <div class="login_box">
+            <h1>
+                  <b>
+                        Just Mercy Text Application
+                  </b>
+            </h1>
+            <h2>
+                  Login Here
+            </h2>
+
+            <form action="" method="POST">
+                  <input type="text" placeholder="Username" name="username" id="username"> <br>
+                  <input type="password" placeholder="Password" name="password" value="{{request.form.password}}">
+                  <br> <br>
+                  <input type="submit" value="Login">
+            </form>
+            {% if error %}
+            <p class="error">
+                  <strong>Error: </strong> {{ error }}
+            </p>
+            {% endif %}
+      </div>
+
+      {% endblock %}
+</body>
+
 </html>
