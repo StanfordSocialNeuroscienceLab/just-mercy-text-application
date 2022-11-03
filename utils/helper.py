@@ -1,11 +1,9 @@
 #!/bin/python3
-"""
-Helper Functions
-"""
 import sqlite3, json, os, pytz
 from datetime import datetime
 import pandas as pd
 from twilio.rest import Client
+from time import sleep
 
 
 ##########
@@ -255,6 +253,10 @@ def sql_init(destroy=False):
 
     # -- Case: Database exists and we want to start over
     if destroy:
+
+        os.remove(os.path.join(here, "jm.db"))
+        sleep(2)
+
         with sqlite3.connect(os.path.join(here, "jm.db")) as connection:
             with open(os.path.join(here, "schema.sql")) as script:
                 cursor = connection.cursor()
