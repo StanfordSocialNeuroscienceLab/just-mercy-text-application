@@ -1,7 +1,9 @@
-auth/*
-.DS_Store
+auth/
+packets/
+
+###
+
+*.DS_Store*
 *.pyc
 *.ipynb
 *.db
-
-packets/
