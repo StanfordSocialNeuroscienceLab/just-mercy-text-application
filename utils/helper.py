@@ -551,3 +551,14 @@ def test_twilio_wrapper(name: str = "Ian"):
     message = "Sup big dog, this is a test of the automated Just Mercy text system"
 
     API.messages.create(to=number, from_=TWIL_number, body=message)
+
+
+def easy_lookup(contact_number: str):
+    """
+    Return DataFrame of individuals who match contact_number
+    """
+
+    sql = f"""select * from participants where phone_number = {contact_number}"""
+
+    with sqlite3.connect(os.path.join(here, "jm.db")) as conn:
+        return pd.read_sql(sql=sql, con=conn)

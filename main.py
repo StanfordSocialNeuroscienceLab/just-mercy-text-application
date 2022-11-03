@@ -246,6 +246,18 @@ def nuclear_option():
     return render_template("utilities/nuclear_option.html")
 
 
+@app.route("/lookup_contact", methods=["GET", "POST"])
+@auth.login_required
+def lookup_contact():
+    if request.method == "POST":
+        contact = request.form["contact_number"]
+        data = easy_lookup(contact_number=contact)
+
+        return render_template("utilities/lookup_result.html", data=data)
+
+    return render_template("utilities/lookup.html")
+
+
 ##########
 
 

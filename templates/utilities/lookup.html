@@ -1,0 +1,18 @@
+<html>
+{% extends 'base.html' %}
+
+<body>
+    {% block content %}
+    <h3>Lookup Individual Contact</h3>
+
+    <form action="{{ url_for('lookup_contact') }}" method="POST">
+        <label for="contact_number">Contact Number</label><br>
+        <input type="text" id="contact_number" name="contact_number">
+        <br><br><br><br>
+        <input type="submit" value="Lookup">
+    </form>
+
+    {% endblock %}
+</body>
+
+</html>
