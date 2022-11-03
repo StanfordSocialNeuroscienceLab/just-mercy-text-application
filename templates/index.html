@@ -1,0 +1,77 @@
+<html>
+{% extends "base.html" %}
+
+<body>
+    {% block content %}
+
+    <img src="static/THE_OG.jpg" class="index_image">
+
+    <div class="index_container">
+        <h1>
+            <b>Just Mercy Text Application</b>
+        </h1>
+
+        <a href="{{ url_for('texts') }}">
+            <h3>
+                Send Texts
+            </h3>
+        </a>
+
+        <div class="index_box">
+
+            <h2>Logs</h2>
+
+            <a href="{{ url_for('participant_log') }}">
+                <h3>
+                    Participant Log
+                </h3>
+            </a>
+
+            <a href="{{ url_for('outgoing_texts') }}">
+                <h3>
+                    Outgoing Texts
+                </h3>
+            </a>
+
+            <a href="{{ url_for('incoming_texts') }}">
+                <h3>
+                    Incoming Texts
+                </h3>
+            </a>
+
+            <a href="{{ url_for('twilio_error_log') }}">
+                <h3>
+                    Twilio Error Log
+                </h3>
+            </a>
+        </div>
+
+        <div class="index_box">
+
+            <h2>Utilities</h2>
+
+            <a href="{{ url_for('add_to_db') }}">
+                <h3>
+                    Add to Database
+                </h3>
+            </a>
+            <a href="{{ url_for('change_phone_number') }}">
+                <h3>Change Contact Number</h3>
+            </a>
+            <a href="{{ url_for('update') }}">
+                <h3>
+                    Ignore Participants
+                </h3>
+            </a>
+            <a href="{{ url_for('nuclear_option') }}">
+                <h3>
+                    [ DANGER ] Reset Database
+                </h3>
+            </a>
+        </div>
+    </div>
+
+    {% endblock %}
+</body>
+
+</html>

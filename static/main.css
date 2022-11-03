@@ -1,0 +1,40 @@
+body {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* LOGIN */
+.login_box {
+    margin: 10%;
+    padding: 10px;
+}
+
+.login_box h1, h2 {
+    margin: 2%;
+}
+
+
+/* INDEX */
+.index_image {
+    width: 40%;
+    margin: 5%;
+}
+
+.index_box {
+    padding: 0.8%;
+}
+
+
+/* TEXTS */
+.text_button input {
+    width: 10%;
+}
+
+/* DEV */
+.dev_table table {
+    padding: 50px 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 85%;
+}

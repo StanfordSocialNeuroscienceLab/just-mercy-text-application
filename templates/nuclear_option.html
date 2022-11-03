@@ -1,0 +1,20 @@
+<html>
+{% extends "base.html" %}
+
+<body>
+    {% block content %}
+
+    <a href="{{ url_for('index') }}">
+        <img src="static/THE_OG.jpg" class="index_image">
+    </a>
+
+    <form action="{{ url_for('nuclear_option') }}" method="POST">
+        <label for="confirm">Type <b>YES</b> to reset database</label><br>
+        <input type="text" id="confirm" name="confirm">
+        <br><br><br><br>
+        <input type="submit" value="RESET">
+    </form>
+    {% endblock %}
+</body>
+
+</html>
