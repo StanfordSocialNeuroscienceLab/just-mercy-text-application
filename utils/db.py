@@ -43,7 +43,7 @@ class ParseSubjects:
         file.dropna(inplace=True)
 
         def clean_phone_number(x):
-            return x.replace("-", "").replace("+1", "").strip()
+            return str(x).replace("-", "").replace("+1", "").strip()
 
         def clean_name(x):
             return x.title().strip()
