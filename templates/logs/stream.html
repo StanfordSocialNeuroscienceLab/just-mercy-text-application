@@ -7,11 +7,24 @@
     <h2>
         Participant Log
     </h2>
-
-    <div class="dev_table">
-        {{ data | safe }}
-    </div>
-
+    <table class="table table-striped">
+        <thead>
+            {% for var in data.columns %}
+            <th>{{ var }}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+            {% for ix in range(data.shape[0]) %}
+            <tr>
+                {% for var in data.columns %}
+                <td>
+                    {{ data[var][ix] }}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% endblock %}
 </body>
 
