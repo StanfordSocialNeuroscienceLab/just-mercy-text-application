@@ -51,7 +51,7 @@ class ParseSubjects:
                 f"Check column names - we need the following: {column_targets}"
             )
 
-        file.dropna(inplace=True)
+        file.fillna("MISSING", inplace=True)
 
         ###
 
@@ -60,7 +60,12 @@ class ParseSubjects:
             Remove all extraneous characters from phone number
             """
 
-            x = str(x)
+            try:
+                x = str(int(x))
+            except:
+                x = str(x)
+
+            ###
 
             for char in ["-", "+1", "(", ")"]:
                 x = x.replace(char, "")

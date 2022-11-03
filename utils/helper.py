@@ -61,6 +61,10 @@ def send_texts(dataframe):
         contact_number = dataframe["phone_number"][ix]
         study_date = dataframe["date_of_study"][ix]
 
+        if contact_number == "MISSING":
+            flash(f"{name} not contacted (missing number)")
+            continue
+
         # E.g., Ian Ferguson => Ian
         first_name = name.split(" ")[0].title()
 

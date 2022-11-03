@@ -1,17 +1,18 @@
 <html>
-    {% extends "base.html" %}
+{% extends "base.html" %}
 
-    <body>
-        {% block content %}
+<body>
+    {% block content %}
 
-        <a href="{{ url_for('index') }}">
-            <img src="static/THE_OG.jpg" class="index_image">
-        </a>
+    <a href="{{ url_for('index') }}">
+        <img src="static/THE_OG.jpg" class="index_image">
+    </a>
 
-        <div class="dev_table">
-            {{ data | safe }}
-        </div>
+    <div class="dev_table">
+        {{ data | safe }}
+    </div>
 
-        {% endblock %}
-    </body>
+    {% endblock %}
+</body>
+
 </html>
